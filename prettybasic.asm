@@ -1,4 +1,4 @@
-output_bin "syntax_highlight_zx82.rom",$0000,$4000 ; The bin rom
+output_bin "prettybasic.rom",$0000,$4000 ; The bin rom
 zoWarnFlow              = true
 
 ;************************************************************************
@@ -19075,23 +19075,29 @@ L386C:  DEFB    $38             ;;end-calc              last value is 1 or 0.
 ; THE 'SPARE' LOCATIONS
 ; ---------------------
 
-
-
-
-
-
 // a custom replacement of the #1937 OUT-CH function /egl
 
 // features:
 // - syntax highlighting of the LIST command
 // - dynamic color schemes
 
-// dreamdo: (it's like a "todo", but i'm not sure i'll do that really)
+// dreamdo: (it's like a "todo", but i'm not sure i'll do that)
 // - basic line numbers colors
 // - current line cursor white-on-red
 // - indentations between FOR...NEXT
 // - carriage return after THEN and : (command divider)
 // - make black-on yellow the REM operator and text up to the end of line
+
+// a guy called weiv from the forum http://zx-pk.ru has recommended me to:
+//       Кроме того, и это более важно, очень много программ использует свободное место в ПЗУ
+//       как таблицу векторов прерывания IM 2 (сходу вспомню Bomb Jack и Rambo).
+//       Допись туда своего кода ведет, естественно, к потере работоспособности этих
+//       программ - с этим столкнулись пользователи клонов с расширенным ПЗУ, а также пользователи оригинальных +2А/+3.
+//       Частично проблему можно решить, оставляя байты #FFFF хотя бы по адресам #3XFF-#3XFF+1,
+//       т.к. на исправной машине без подключенной редкой периферии (AMX Mouse)
+//       на шине данных в момент прерывания всегда #FF
+//
+// in short, to put 0xFFFF in the all 0x3*ff addresses of this firmware area
 
 
 colStart:
@@ -19219,7 +19225,7 @@ colMarkOperators:                                       ; operators: blue on whi
                         JP colOutCh
 
 colMarkFunctions:                                       ; functions: green on white
-                        ld c,  2
+                        ld c,  3
                         CALL colApplyColor
                         JP colOutCh
 
@@ -19499,44 +19505,19 @@ colExit:
 ; end of colored list subroutine
 
 
-; alternative startup message (L1539 copyright) /egl
+; alternative startup message in color
+; the original at L1539
 ;;
 msgCopyrightNew:
-        ;DEFB    $7F                                     ; copyright
-        ;DEFM    " 1982 Sinclair Research Lt"
-        ;DEFB    'd'+$80
-        DEFB    $20
-        DEFB    $11, $2, $20                            ; color boxes
-        DEFB    $11, $6, $20
-        DEFB    $11, $4, $20
-        DEFB    $11, $5, $20
-        DEFB    $11, $1, $20
-        DEFB    $11, $3, $20
-        DEFB    $11, $7
-        DEFM    " Extended  Editor "
-        DEFB    $11, $3, $20                            ; color boxes
-        DEFB    $11, $1, $20
-        DEFB    $11, $5, $20
-        DEFB    $11, $4, $20
-        DEFB    $11, $6, $20
-        DEFB    $11, $2, $20 + $80                      ; last block (+$80)
+        DEFB $10, $2                                    ; red ink
+        DEFB    $7F                                     ; copyright
+        DEFM    " 1982 Sinclair Research Lt"
+        DEFB    'd'+$80
+
 
 
 ; ================================================================================================
-; /egl
-; weiv from zx-pk.ru recommended me to do that:
-; Кроме того, и это более важно, очень много программ использует свободное место в ПЗУ
-; как таблицу векторов прерывания IM 2 (сходу вспомню Bomb Jack и Rambo).
-; Допись туда своего кода ведет, естественно, к потере работоспособности этих
-; программ - с этим столкнулись пользователи клонов с расширенным ПЗУ, а также пользователи оригинальных +2А/+3.
-; Частично проблему можно решить, оставляя байты #FFFF хотя бы по адресам #3XFF-#3XFF+1,
-; т.к. на исправной машине без подключенной редкой периферии (AMX Mouse)
-; на шине данных в момент прерывания всегда #FF
-;ORG $38FF
-;        DEFB $FF,$FF
-
-ORG $39FF
-        DEFB $FF,$FF
+; something with compatibility. weiv from zx-pk.ru is recommending to fill 3xFF and 3xFF+1 with FF
 
 ORG $3AFF
         DEFB $FF,$FF
@@ -19551,8 +19532,8 @@ ORG $3CFF
 
 /*
         ; free spaces in ROM have to be filled with FF but i'm too lazy to do that honestly. /egl
-        ; here you go.
-
+        ;
+        ; here you go:
         DEFB    $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF;
 
 */
