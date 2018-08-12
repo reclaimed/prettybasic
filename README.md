@@ -108,7 +108,7 @@ ZX Spectrum and its firmware (ROM) are owned by AMSTRAD and their position on th
   * iceoflame
   * Andrew771
   * Alex Rider
-* Andrew Owen
+* [Andrew Owen](https://github.com/cheveron/)
 
 
 
