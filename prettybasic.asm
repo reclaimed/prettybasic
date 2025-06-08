@@ -7364,7 +7364,7 @@ L192B:  ADD     HL,BC           ; add negative number to HL.
 ; This subroutine ...
 
 ;; OUT-CHAR
-L1937:  jp      colStart   ; jump to the new OutChar, now with colors! /egl
+L1937:  jp      col_start   ; jump to the new OutChar, now with colors! /egl
 
 
 
@@ -19121,7 +19121,7 @@ L386C:  DEFB    $38             ;;end-calc              last value is 1 or 0.
 // a custom replacement of the #1937 OUT-CH function /egl
 
 ORG $386E
-colStart:
+col_start:
                         ; backup the current color value
                         ; will use B to backup the current color value
                         ; and C for various tasks
@@ -19135,7 +19135,7 @@ colStart:
 
                         ; is this a REM?
                         cp $ea                          ; rem
-                        jp z, col_format_REM                  
+                        jr z, col_format_REM                  
 
                         cp $eb                          ; for
                         jp z, col_format_Flow
@@ -19157,7 +19157,7 @@ colStart:
                         jp z, col_format_Flow
 
                         cp $cb                          ; then 
-                        jp z, col_format_THEN
+                        jr z, col_format_THEN
 
 
 
@@ -19166,7 +19166,7 @@ colStart:
                         jr c, col_start_not_uppercase
                         cp $5B       ; 'Z'+1
                         jr nc, col_start_not_uppercase
-                        jp col_format_Letters
+                        jr col_format_Letters
 
 col_start_not_uppercase:
                         ; Проверка строчных букв
@@ -19174,7 +19174,7 @@ col_start_not_uppercase:
                         jr c, col_start_not_lowercase
                         cp $7B       ; 'z'+1
                         jr nc, col_start_not_lowercase
-                        jp col_format_Letters
+                        jr col_format_Letters
 
 col_start_not_lowercase:
                         ; Проверка ключевых слов и функций
@@ -19182,15 +19182,15 @@ col_start_not_lowercase:
                         jr c, col_start_not_keyword
                         cp $C5
                         jr c, col_format_Functions
-                        jp col_format_Operators
+                        jr col_format_Operators
 
 col_start_not_keyword:
                         ; Финальная проверка на цифры (дублирующая, для страховки)
                         CALL L2D1B
-                        jp nc, col_format_Digits
+                        jr nc, col_format_Digits
 
                         ; Если ни одна проверка не сработала - цвет по умолчанию
-                        jp col_format_Default
+                        jr col_format_Default
 
 
 ; 
@@ -19227,23 +19227,31 @@ col_format_REM:
 col_format_Operators:                                       ; operators: blue on white
                         ld c, 6
                         CALL col_apply_color
-                        JP col_print_Character
+                        jp col_print_Character
 
 col_format_Functions:                                       ; functions: green on white
                         ld c,  3
-                        CALL col_apply_color
-                        JP col_print_Character
+                        call col_apply_color
+                        jp col_print_Character
 
 col_format_Letters:                                         ; letters: magenta on white
                         ld c, 4
                         call col_apply_color
-                        JP col_print_Character
+                        jp col_print_Character
 
+
+
+;  something with compatibility. good man weiv from zx-pk.ru recommends to write 0xFFFF at 3xFF to make sure Bomb Jack and Rambo will work
+org $38FF ; 14591
+DEFB $ff, $fF
+org $3901 ; 14593        
 
 col_format_Digits:                                          ; digits: black on white
                         ld c, 7
                         call col_apply_color
                         jp col_print_Character_3
+
+                        
 
 col_format_THEN:
 ; place a CR and five spaces before THEN
@@ -19255,7 +19263,7 @@ col_format_THEN:
                         ld hl, ($5c51)
                         ld a, $bb                      ; if not CH#2 (screen), exit
                         cp l
-                        jp nz, col_format_THEN_not_screen
+                        jr nz, col_format_THEN_not_screen
 
                         ; set the THEN flag
                         ld a, (23729)
@@ -19274,6 +19282,9 @@ col_format_THEN:
                         ld a, 32        ; space
                         RST 16 
                         ld a, $3a       ; colon
+
+
+
                         RST 16 
                         ld a, 32        ; space
                         RST 16 
@@ -19322,7 +19333,7 @@ col_format_THEN_not_screen:
 col_format_Flow:                                            ; flow operators: red on white
                         ld c, 5
                         call col_apply_color
-                        jp col_print_Character
+                        jr col_print_Character
 
 
 ; 
@@ -19352,13 +19363,13 @@ col_is_flag_REM:
                         ld hl, ($5c51)                 ; try to determine the channel
                         ld a, $bb                      ; if not CH#2 (screen), exit
                         cp l
-                        jp nz, col_is_flag_REM_Exit
+                        jr nz, col_is_flag_REM_Exit
 
 
                         ld a, (23729)
                         BIT 1, a                        ; if bit a.1==1 then NZ
                                                         ; if bit a.1==0 then Z
-                        jp Z, col_is_flag_REM_Exit               ; if Z then exit
+                        jr Z, col_is_flag_REM_Exit               ; if Z then exit
 
                         ; set color: black on yellow
                         ld c, 15
@@ -19380,12 +19391,12 @@ col_is_flag_THEN:
                         ld hl, ($5c51)
                         ld a, $bb                      ; if not CH#2 (screen), exit
                         cp l
-                        jp nz, col_is_flag_THEN_Exit
+                        jr nz, col_is_flag_THEN_Exit
 
                         ld a, (23729)
                         BIT 0, a                        ; if bit a.0==1 then NZ
                                                         ; if bit a.0==0 then Z
-                        JP Z, col_is_flag_THEN_Exit        ; if Z then exit
+                        jp Z, col_is_flag_THEN_Exit        ; if Z then exit
 
                         ; print indent
                         ld a, 32
