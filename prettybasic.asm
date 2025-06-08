@@ -19107,17 +19107,6 @@ L386C:  DEFB    $38             ;;end-calc              last value is 1 or 0.
 // - carriage return after THEN and : (command divider)
 // - make black-on yellow the REM operator and text up to the end of line
 
-// a guy called weiv from the forum http://zx-pk.ru has recommended me to:
-//       ����� ����, � ��� ����� �����, ����� ����� �������� ���������� ��������� ����� � ���
-//       ��� ������� �������� ���������� IM 2 (����� ������� Bomb Jack � Rambo).
-//       ������ ���� ������ ���� �����, �����������, � ������ ����������������� ����
-//       �������� - � ���� ����������� ������������ ������ � ����������� ���, � ����� ������������ ������������ +2�/+3.
-//       �������� �������� ����� ������, �������� ����� #FFFF ���� �� �� ������� #3XFF-#3XFF+1,
-//       �.�. �� ��������� ������ ��� ������������ ������ ��������� (AMX Mouse)
-//       �� ���� ������ � ������ ���������� ������ #FF
-//
-// in short, to put 0xFFFF in the all 0x3*ff addresses of this firmware area
-
 // a custom replacement of the #1937 OUT-CH function /egl
 
 ORG $386E
