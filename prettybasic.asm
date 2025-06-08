@@ -5607,8 +5607,8 @@ L121C:
                                 ; the screen and set attributes.
         XOR     A               ; clear accumulator so that we can address
 
-;        LD      DE,L1539 - 1    ; the message table directly.
-        LD      DE, msgCopyrightNew - 1 ; /egl
+       LD      DE,L1539 - 1    ; the message table directly.
+        ; LD      DE, msgCopyrightNew - 1 ; /egl
         CALL    L0C0A           ; routine PO-MSG puts
                                 ; '(c) 1982 Sinclair Research Ltd'
                                 ; at bottom of display.
@@ -5903,9 +5903,13 @@ L1537:  DEFB    ',',' '+$80                             ; used in report line.
 
 
 ;; copyright
-L1539:  DEFB    $7F                                     ; copyright
-        DEFM    " 1982 Sinclair Research Lt"
-        DEFB    'd'+$80
+; L1539:  DEFB    $7F                                     ; copyright
+;         DEFM    " 1982 Sinclair Research Lt"
+;         DEFB    'd'+$80
+
+L1539:  DEFM    "       Pretty Basic v1.2"
+        DEFB    '5'+$80
+
 
 
 ; -------------
@@ -7090,9 +7094,9 @@ L1865:  LD      (IY+$2D),E      ; save flag in BREG which is spare.
         PUSH    BC              ; save return address
 
 
+        call col_L1865_OUT_LINE_1_EXTENSION    ; L1A28 is called from there
         ;CALL    L1A28           ; routine OUT-NUM-2 to print addressed number
                                 ; with leading space.
-        call colFlagResetEOL    ; L1A28 is called from colFlagResetEOL
 
 
         INC     HL              ; skip low number byte.
@@ -19075,13 +19079,28 @@ L386C:  DEFB    $38             ;;end-calc              last value is 1 or 0.
 ; THE 'SPARE' LOCATIONS
 ; ---------------------
 
-// a custom replacement of the #1937 OUT-CH function /egl
+
+
+; 
+;                  888               888                     888    
+;                  888               888                     888    
+;                  888               888                     888    
+;  .d8888b .d88b.  888      .d8888b  888888  8888b.  888d888 888888 
+; d88P"   d88""88b 888      88K      888        "88b 888P"   888    
+; 888     888  888 888      "Y8888b. 888    .d888888 888     888    
+; Y88b.   Y88..88P 888           X88 Y88b.  888  888 888     Y88b.  
+;  "Y8888P "Y88P"  888       88888P'  "Y888 "Y888888 888      "Y888 
+;                                                                   
+;                                                                   
+;                                                                   
+; 
+
 
 // features:
 // - syntax highlighting of the LIST command
 // - dynamic color schemes
 
-// dreamdo: (it's like a "todo", but i'm not sure i'll do that)
+// dreamdo: (it's like a "todo", but i'm not sure i'll ever do)
 // - basic line numbers colors
 // - current line cursor white-on-red
 // - indentations between FOR...NEXT
@@ -19089,103 +19108,425 @@ L386C:  DEFB    $38             ;;end-calc              last value is 1 or 0.
 // - make black-on yellow the REM operator and text up to the end of line
 
 // a guy called weiv from the forum http://zx-pk.ru has recommended me to:
-//       Кроме того, и это более важно, очень много программ использует свободное место в ПЗУ
-//       как таблицу векторов прерывания IM 2 (сходу вспомню Bomb Jack и Rambo).
-//       Допись туда своего кода ведет, естественно, к потере работоспособности этих
-//       программ - с этим столкнулись пользователи клонов с расширенным ПЗУ, а также пользователи оригинальных +2А/+3.
-//       Частично проблему можно решить, оставляя байты #FFFF хотя бы по адресам #3XFF-#3XFF+1,
-//       т.к. на исправной машине без подключенной редкой периферии (AMX Mouse)
-//       на шине данных в момент прерывания всегда #FF
+//       пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ, пїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅ
+//       пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ IM 2 (пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ Bomb Jack пїЅ Rambo).
+//       пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
+//       пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ - пїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ, пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ +2пїЅ/+3.
+//       пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ #FFFF пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ #3XFF-#3XFF+1,
+//       пїЅ.пїЅ. пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ (AMX Mouse)
+//       пїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ #FF
 //
 // in short, to put 0xFFFF in the all 0x3*ff addresses of this firmware area
 
+// a custom replacement of the #1937 OUT-CH function /egl
 
+ORG $386E
 colStart:
                         ; backup the current color value
                         ; will use B to backup the current color value
                         ; and C for various tasks
-                        PUSH BC
+                        PUSH BC ; stack: BC
                         LD BC, (23695)                  ; backup the current color (to restore it later)
-                        PUSH BC
+                        PUSH BC ; stack: BC, BC
 
-                        ; now look what the A-messenger has brought to us
-
-colIsControl:
                         ; control codes
-                        cp $20                          ; if a<$20
-                        JP c, colExit                   ; then drop it
+                        ;cp $20                          ; if a<$20
+                        ;JP c, col_finalize                   ; then drop it
 
-colIsREM:
-                        ; is it a REM?
-                        cp $ea                          ;
-                        jp nz, colIsFlowOperator        ; if a!=$ea skip the next part
+                        ; is this a REM?
+                        cp $ea                          ; rem
+                        jp z, col_format_REM                  
 
+                        cp $eb                          ; for
+                        jp z, col_format_Flow
+                        cp $cc                          ; to
+                        jp z, col_format_Flow
+                        cp $cd                          ; step
+                        jp z, col_format_Flow
+                        cp $f3                          ; next
+                        jp z, col_format_Flow
+                        cp $fa                          ; if
+                        jp z, col_format_Flow
+                        cp $fe                          ; return
+                        jp z, col_format_Flow
+                        cp $ed                          ; gosub
+                        jp z, col_format_Flow
+                        cp $ec                          ; goto
+                        jp z, col_format_Flow
+                        cp $e2                          ; stop
+                        jp z, col_format_Flow
+
+                        cp $cb                          ; then 
+                        jp z, col_format_THEN
+
+
+
+                        ; РџСЂРѕРІРµСЂРєР° Р·Р°РіР»Р°РІРЅС‹С… Р±СѓРєРІ
+                        cp $41       ; 'A'
+                        jr c, col_start_not_uppercase
+                        cp $5B       ; 'Z'+1
+                        jr nc, col_start_not_uppercase
+                        jp col_format_Letters
+
+col_start_not_uppercase:
+                        ; РџСЂРѕРІРµСЂРєР° СЃС‚СЂРѕС‡РЅС‹С… Р±СѓРєРІ
+                        cp $61       ; 'a'
+                        jr c, col_start_not_lowercase
+                        cp $7B       ; 'z'+1
+                        jr nc, col_start_not_lowercase
+                        jp col_format_Letters
+
+col_start_not_lowercase:
+                        ; РџСЂРѕРІРµСЂРєР° РєР»СЋС‡РµРІС‹С… СЃР»РѕРІ Рё С„СѓРЅРєС†РёР№
+                        cp $A5
+                        jr c, col_start_not_keyword
+                        cp $C5
+                        jr c, col_format_Functions
+                        jp col_format_Operators
+
+col_start_not_keyword:
+                        ; Р¤РёРЅР°Р»СЊРЅР°СЏ РїСЂРѕРІРµСЂРєР° РЅР° С†РёС„СЂС‹ (РґСѓР±Р»РёСЂСѓСЋС‰Р°СЏ, РґР»СЏ СЃС‚СЂР°С…РѕРІРєРё)
+                        CALL L2D1B
+                        jp nc, col_format_Digits
+
+                        ; Р•СЃР»Рё РЅРё РѕРґРЅР° РїСЂРѕРІРµСЂРєР° РЅРµ СЃСЂР°Р±РѕС‚Р°Р»Р° - С†РІРµС‚ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ
+                        jp col_format_Default
+
+
+; 
+;  .d888                                        888    
+; d88P"                                         888    
+; 888                                           888    
+; 888888 .d88b.  888d888 88888b.d88b.   8888b.  888888 
+; 888   d88""88b 888P"   888 "888 "88b     "88b 888    
+; 888   888  888 888     888  888  888 .d888888 888    
+; 888   Y88..88P 888     888  888  888 888  888 Y88b.  
+; 888    "Y88P"  888     888  888  888 "Y888888  "Y888 
+;                                                      
+;                                                      
+;                                                      
+; 
+
+
+col_format_Default:
+                        ld c, 7                         ; apply the default contrast color
+                        call col_apply_color
+                        jp col_print_Character
+
+
+col_format_REM:
                         ; if yes, set the flag and set the color
-                        push af
+                        push af  ; stack: BC, BC, AF
                         ld a, (23729)
                         set 1, a
                         ld (23729), a
+                        pop af ; stack: BC, BC
+
+                        jp col_print_Character                ; skip the rest parsing routines
+
+col_format_Operators:                                       ; operators: blue on white
+                        ld c, 6
+                        CALL col_apply_color
+                        JP col_print_Character
+
+col_format_Functions:                                       ; functions: green on white
+                        ld c,  3
+                        CALL col_apply_color
+                        JP col_print_Character
+
+col_format_Letters:                                         ; letters: magenta on white
+                        ld c, 4
+                        call col_apply_color
+                        JP col_print_Character
+
+
+col_format_Digits:                                          ; digits: black on white
+                        ld c, 7
+                        call col_apply_color
+                        jp col_print_Character_3
+
+col_format_THEN:
+; place a CR and five spaces before THEN
+                        PUSH AF
+                        PUSH bc
+                        PUSH hl
+
+                        ; determine the current IO channel
+                        ld hl, ($5c51)
+                        ld a, $bb                      ; if not CH#2 (screen), exit
+                        cp l
+                        jp nz, col_format_THEN_not_screen
+
+                        ; set the THEN flag
+                        ld a, (23729)
+                        set 0, a
+                        ld (23729), a
+
+                        ; newline
+                        ld a, 13        ; CR
+                        RST 16 
+
+                        ; indent
+                        ld a, 32        ; space
+                        RST 16 
+                        ld a, 32        ; space
+                        RST 16 
+                        ld a, 32        ; space
+                        RST 16 
+                        ld a, $3a       ; colon
+                        RST 16 
+                        ld a, 32        ; space
+                        RST 16 
+
+                        ; set flow color
+                        ld c, 5
+                        call col_apply_color
+
+                        ; then
+                        ld a, $cb
+                        RST 16 
+
+                        ; newline
+                        ld a, 13        ; CR
+                        RST 16 
+
+                        ; indent
+                        ld a, 32        ; space
+                        RST 16 
+                        ld a, 32        ; space
+                        RST 16 
+                        ld a, 32        ; space
+                        RST 16 
+                        ld a, $3a       ; colon
+                        RST 16 
+                        ld a, 32        ; space
+                        RST 16 
+                        ld a, 32        ; space
+                        RST 16 
+                        ;ld a, 32        ; space
+                        ;RST 16 
+
+                        pop hl
+                        pop bc
                         pop af
-
-                        jp colOutCh                ; skip the rest parsing routines
-
-colIsFlowOperator:
-                        ; flow operators FOR, NEXT, IF, THEN
-                        cp $eb                          ; for
-                        jp z, colMarkFlow
-                        cp $cc                          ; to
-                        jp z, colMarkFlow
-                        cp $cd                          ; step
-                        jp z, colMarkFlow
-                        cp $f3                          ; next
-                        jp z, colMarkFlow
-                        cp $fa                          ; if
-                        jp z, colMarkFlow
-                        cp $cb                          ; then (note the colMarkThen jump!)
-                        jp z, colMarkThen
-                        cp $fe                          ; return
-                        jp z, colMarkFlow
-                        cp $ed                          ; gosub
-                        jp z, colMarkFlow
-                        cp $ec                          ; goto
-                        jp z, colMarkFlow
-                        cp $e2                          ; stop
-                        jp z, colMarkFlow
-
-colIsNumeric:
-                        CALL L2D1B                      ; is it a digit ? (routine NUMERIC tests)
-                        JP NC,colMarkDigits             ;
-
-colIsKeyword:
-                        CP $A5                          ; if not a keyword
-                        JR C,colIsCapsLetter            ; then skip the next part
-
-                        CP $C5                          ; if it's a function
-                        JR C,colMarkFunctions           ; then go to functions
-                        JP colMarkOperators             ; else go to operators
-
-colIsCapsLetter:
-                        ; "A"==$41      "Z"==$5A
-
-                        cp $41                          ; if lower than "A" letter
-                        jp C, colMarkDefault            ; then set the default color
-
-                        CP $5B                          ; if in caps range,
-                        JP C, colMarkLetters            ; then go to letter colorizer
-
-colIsSmallLetter:
-                        ; "a"==$61      "z"==$7A
-
-                        CP $61                          ; if not in the a-z range
-                        jp C, colMarkDefault            ; then set the default color
-
-                        CP $7B                          ; if in small letters range,
-                        JP C, colMarkLetters            ; then go to letters
+                        jp col_finalize
+                        ;jp col_format_Flow ; 2025-06-08
 
 
-; color functions -------------------------------------------------------------------------
+col_format_THEN_not_screen:
+                        pop hl
+                        pop bc
+                        pop af
+                        ; jp col_format_Flow
 
-colApplyColor:
+col_format_Flow:                                            ; flow operators: red on white
+                        ld c, 5
+                        call col_apply_color
+                        jp col_print_Character
+
+
+; 
+;  .d888 888                            
+; d88P"  888                            
+; 888    888                            
+; 888888 888  8888b.   .d88b.  .d8888b  
+; 888    888     "88b d88P"88b 88K      
+; 888    888 .d888888 888  888 "Y8888b. 
+; 888    888 888  888 Y88b 888      X88 
+; 888    888 "Y888888  "Y88888  88888P' 
+;                          888          
+;                     Y8b d88P          
+;                      "Y88P"           
+; 
+
+
+; sysvar 23729 is used to store this routine's state
+; bit 0: THEN. set after the THEN operator
+; bit 1: REM. set when the REM operator has met
+
+col_is_flag_REM:
+                        push af
+                        push bc
+                        push hl
+
+                        ld hl, ($5c51)                 ; try to determine the channel
+                        ld a, $bb                      ; if not CH#2 (screen), exit
+                        cp l
+                        jp nz, col_is_flag_REM_Exit
+
+
+                        ld a, (23729)
+                        BIT 1, a                        ; if bit a.1==1 then NZ
+                                                        ; if bit a.1==0 then Z
+                        jp Z, col_is_flag_REM_Exit               ; if Z then exit
+
+                        ; set color: black on yellow
+                        ld c, 15
+                        call col_apply_color
+
+col_is_flag_REM_Exit:
+                        pop hl
+                        pop bc
+                        pop af
+                        ret
+
+
+col_is_flag_THEN:
+                        push AF
+                        push BC
+                        push hl
+
+                        ; determine the current IO channel
+                        ld hl, ($5c51)
+                        ld a, $bb                      ; if not CH#2 (screen), exit
+                        cp l
+                        jp nz, col_is_flag_THEN_Exit
+
+                        ld a, (23729)
+                        BIT 0, a                        ; if bit a.0==1 then NZ
+                                                        ; if bit a.0==0 then Z
+                        JP Z, col_is_flag_THEN_Exit        ; if Z then exit
+
+                        ; print indent
+                        ld a, 32
+                        RST 16 
+                        ld a, 32
+                        RST 16 
+col_is_flag_THEN_Exit:
+                        pop hl
+                        pop bc
+                        pop af
+                        ret
+
+
+
+; 
+;                  d8b          888    
+;                  Y8P          888    
+;                               888    
+; 88888b.  888d888 888 88888b.  888888 
+; 888 "88b 888P"   888 888 "88b 888    
+; 888  888 888     888 888  888 888    
+; 888 d88P 888     888 888  888 Y88b.  
+; 88888P"  888     888 888  888  "Y888 
+; 888                                  
+; 888                                  
+; 888                                  
+; 
+
+
+col_print_Character:
+
+                        call col_is_flag_REM              ; process REM flag color
+
+
+                        CP $21                          ; less than quote character ?
+                        JP C,col_print_Character_3                  ; to OUT-CH-3 to output controls and space.
+
+                        RES 2,(IY+$01)                  ; initialize FLAGS to 'K' mode and leave
+                                                        ; unchanged if this character would precede
+                                                        ; a keyword.
+
+                        CP $CB                          ; is character 'THEN' token ?
+                        JP Z,col_print_Character_3                  ; to OUT-CH-3 to output if so.
+
+                        CP $3A                          ; is it ':' ?
+                        JP NZ,col_print_Character_1                 ; to OUT-CH-1 if not statement separator
+                                                        ; to change mode back to 'L'.
+
+                        BIT 5,(IY+$37)                  ; FLAGX  - Input Mode ??
+                        JP NZ,col_print_Character_2                 ; to OUT-CH-2 if in input as no statements.
+                                                        ; Note. this check should seemingly be at
+                                                        ; the start. Commands seem inappropriate in
+                                                        ; INPUT mode and are rejected by the syntax
+                                                        ; checker anyway.
+                                                        ; unless INPUT LINE is being used.
+
+                        BIT 2,(IY+$30)                  ; test FLAGS2 - is the ':' within quotes ?
+                        ;JP Z,col_print_Character_3
+                        jp Z, col_print_colon_Extend          ; to col_print_colon_Extend if ':' is outside quoted text.
+
+                        ; JP col_print_Character_2                    ; to OUT-CH-2 as ':' is within quotes
+
+
+
+col_print_Character_1:
+                        CP $22                          ; is it quote character '"'  ?
+                        JR NZ,col_print_Character_2                 ; to OUT-CH-2 with others to set 'L' mode.
+
+                        PUSH AF                         ; save character.
+                        LD A,($5C6A)                    ; fetch FLAGS2.
+                        XOR $04                         ; toggle the quotes flag.
+                        LD ($5C6A),A                    ; update FLAGS2
+                        POP AF                          ; and restore character.
+
+col_print_Character_2:
+                        SET 2,(IY+$01)                  ; update FLAGS - signal L mode if the cursor
+                                                        ; is next.
+
+
+col_print_Character_3:
+                        RST 10H                         ; PRINT-A vectors the character to
+                                                        ; channel 'S', 'K', 'R' or 'P'.
+                        jp col_finalize
+
+
+; place after symbol a carriage return and indent 5 spaces
+col_print_colon_Extend:
+                        push AF
+                        push hl
+
+                        ld hl, ($5c51)                 ; try to determine the channel
+                        ld a, $bb                      ; if not CH#2 (screen), exit
+                        cp l
+                        jp nz, col_print_colon_Exit
+
+
+                        ; the idea is, only if the channel2 is selected (it is the top part of the screen)
+                        ; indentations and all are printed
+
+                        ; newline
+                        ld a, 13
+                        RST 16 
+                        ; indent
+                        ld a, 32
+                        RST 16 
+                        ld a, 32
+                        RST 16 
+                        ld a, 32
+                        RST 16 
+                        ; colon
+                        ld a, $3a
+                        RST 16 
+                        ; extra indent after THEN
+                        call col_is_flag_THEN             ; process THEN flag indentation
+                        pop hl
+                        pop af
+                        jp col_finalize
+                        ;jp col_print_Character_3
+col_print_colon_Exit:
+                        pop hl
+                        pop af
+                        jp col_print_Character_3
+
+
+; 
+;                            888                                888                  
+;                            888                                888                  
+;                            888                                888                  
+;  8888b.  88888b.  88888b.  888 888  888       .d8888b .d88b.  888  .d88b.  888d888 
+;     "88b 888 "88b 888 "88b 888 888  888      d88P"   d88""88b 888 d88""88b 888P"   
+; .d888888 888  888 888  888 888 888  888      888     888  888 888 888  888 888     
+; 888  888 888 d88P 888 d88P 888 Y88b 888      Y88b.   Y88..88P 888 Y88..88P 888     
+; "Y888888 88888P"  88888P"  888  "Y88888       "Y8888P "Y88P"  888  "Y88P"  888     
+;          888      888               888                                            
+;          888      888          Y8b d88P                                            
+;          888      888           "Y88P"                                             
+; 
+
+
+
+col_apply_color:
                         PUSH AF
                         PUSH BC
                         ld a, (23695)                   ; load the current color (fbpppiii, where ppp and iii are GRB)
@@ -19197,7 +19538,7 @@ colApplyColor:
                         ld a, (23695)                   ; get the current color again
                         and 11111000b                   ; drop the ink
                         or c                            ; glue with the NEW INK
-                        pop bc
+                        POP bc
                         xor c                           ; make it contrast to paper
                         ld (23695), a                   ; apply the color code
                         POP AF
@@ -19205,129 +19546,24 @@ colApplyColor:
 
 
 
-; ================================================================================================
-; something with compatibility. weiv from zx-pk.ru is recommending to fill 3xFF and 3xFF+1 with FF
-org $38FF
-        DEFB $ff, $fF
-org $3901
-; ================================================================================================
-
-colMarkDefault:
-                        ld c, 7                         ; apply the default contrast color
-                        call colApplyColor
-                        jp colOutCh
-
-
-
-colMarkOperators:                                       ; operators: blue on white
-                        ld c, 6
-                        CALL colApplyColor
-                        JP colOutCh
-
-colMarkFunctions:                                       ; functions: green on white
-                        ld c,  3
-                        CALL colApplyColor
-                        JP colOutCh
-
-colMarkLetters:                                         ; letters: magenta on white
-                        ld c, 4
-                        call colApplyColor
-                        JP colOutCh
+; 
+;                   888         888 d8b                                          888                              d8b                   
+;                   888         888 Y8P                                          888                              Y8P                   
+;                   888         888                                              888                                                    
+;  .d88b.  888  888 888888      888 888 88888b.   .d88b.        .d88b.  888  888 888888 .d88b.  88888b.  .d8888b  888  .d88b.  88888b.  
+; d88""88b 888  888 888         888 888 888 "88b d8P  Y8b      d8P  Y8b `Y8bd8P' 888   d8P  Y8b 888 "88b 88K      888 d88""88b 888 "88b 
+; 888  888 888  888 888         888 888 888  888 88888888      88888888   X88K   888   88888888 888  888 "Y8888b. 888 888  888 888  888 
+; Y88..88P Y88b 888 Y88b.       888 888 888  888 Y8b.          Y8b.     .d8""8b. Y88b. Y8b.     888  888      X88 888 Y88..88P 888  888 
+;  "Y88P"   "Y88888  "Y888      888 888 888  888  "Y8888        "Y8888  888  888  "Y888 "Y8888  888  888  88888P' 888  "Y88P"  888  888 
+;                                                                                                                                       
+;                                                                                                                                       
+;                                                                                                                                       
+; 
 
 
-colMarkDigits:                                          ; digits: black on white
-                        ld c, 7
-                        call colApplyColor
-                        jp colOutCh3
-
-; place a CR and five spaces before THEN
-colMarkThen:
-                        push AF
-                        push bc
-                        push hl
-
-                        ; determine the current IO channel
-                        ld hl, ($5c51)
-                        ld a, $bb                      ; if not CH#2 (screen), exit
-                        cp l
-                        jp nz, colMarkThenExit
-
-                        ; set the THEN flag
-                        ld a, (23729)
-                        set 0, a
-                        ld (23729), a
-
-                        ; newline
-                        ld a, 13        ; CR
-                        RST 16
-
-                        ; indent
-                        ld a, 32        ; space
-                        RST 16
-                        ld a, 32        ; space
-                        RST 16
-                        ld a, 32        ; space
-                        RST 16
-                        ld a, $3a       ; colon
-                        RST 16
-                        ld a, 32        ; space
-                        RST 16
-
-                        ; set flow color
-                        ld c, 5
-                        call colApplyColor
-
-                        ; then
-                        ld a, $cb
-                        RST 16
-
-                        ; newline
-                        ld a, 13        ; CR
-                        RST 16
-
-                        ; indent
-                        ld a, 32        ; space
-                        RST 16
-                        ld a, 32        ; space
-                        RST 16
-                        ld a, 32        ; space
-                        RST 16
-                        ld a, $3a       ; colon
-                        RST 16
-                        ld a, 32        ; space
-                        RST 16
-                        ld a, 32        ; space
-                        RST 16
-                        ;ld a, 32        ; space
-                        ;RST 16
-
-                        pop hl
-                        pop bc
-                        pop af
-                        jp colExit
-
-
-colMarkThenExit:
-                        pop hl
-                        pop bc
-                        pop af
-                        jp colMarkFlow
-
-colMarkFlow:                                            ; flow operators: red on white
-                        ld c, 5
-                        call colApplyColor
-                        jp colOutCh
-
-
-; flags processing ----------------------------------------------------------------------------
-
-; sysvar 23729 is used to store this routine's state
-; bit 0: THEN. set after the THEN operator
-; bit 1: REM. set when the REM operator has met
-
-
+col_L1865_OUT_LINE_1_EXTENSION:
+; a custom replacement of the #1937 OUT-CH function /egl
 ; reset the flags in the start of the BASIC line
-colFlagResetEOL:
                         push af
                         ld a, (23729)
                         res 0, a
@@ -19337,206 +19573,80 @@ colFlagResetEOL:
                         CALL    L1A28           ; routine OUT-NUM-2 to print addressed number
                         ret
 
-colIsFlagRem:
-                        push af
-                        push bc
-                        push hl
-
-                        ld hl, ($5c51)                 ; try to determine the channel
-                        ld a, $bb                      ; if not CH#2 (screen), exit
-                        cp l
-                        jp nz, colIsFlagRemExit
-
-
-                        ld a, (23729)
-                        BIT 1, a                        ; if bit a.1==1 then NZ
-                                                        ; if bit a.1==0 then Z
-                        jp Z, colIsFlagRemExit               ; if Z then exit
-
-                        ; set color: black on yellow
-                        ld c, 15
-                        call colApplyColor
-
-colIsFlagRemExit:
-                        pop hl
-                        pop bc
-                        pop af
-                        ret
-
-
-colIsFlagThen:
-                        push AF
-                        push BC
-                        push hl
-
-                        ; determine the current IO channel
-                        ld hl, ($5c51)
-                        ld a, $bb                      ; if not CH#2 (screen), exit
-                        cp l
-                        jp nz, colIsFlagThenExit
-
-                        ld a, (23729)
-                        BIT 0, a                        ; if bit a.0==1 then NZ
-                                                        ; if bit a.0==0 then Z
-                        JP Z, colIsFlagThenExit        ; if Z then exit
-
-                        ; print indent
-                        ld a, 32
-                        rst 16
-                        ld a, 32
-                        rst 16
-colIsFlagThenExit:
-                        pop hl
-                        pop bc
-                        pop af
-                        ret
-
-
-; PRINT ---------------------------------------------------------------
-
-colOutCh:
-
-                        call colIsFlagRem              ; process REM flag color
-
-
-                        CP $21                          ; less than quote character ?
-                        JP C,colOutCh3                  ; to OUT-CH-3 to output controls and space.
-
-                        RES 2,(IY+$01)                  ; initialize FLAGS to 'K' mode and leave
-                                                        ; unchanged if this character would precede
-                                                        ; a keyword.
-
-                        CP $CB                          ; is character 'THEN' token ?
-                        JP Z,colOutCh3                  ; to OUT-CH-3 to output if so.
-
-                        CP $3A                          ; is it ':' ?
-                        JP NZ,colOutCh1                 ; to OUT-CH-1 if not statement separator
-                                                        ; to change mode back to 'L'.
-
-                        BIT 5,(IY+$37)                  ; FLAGX  - Input Mode ??
-                        JP NZ,colOutCh2                 ; to OUT-CH-2 if in input as no statements.
-                                                        ; Note. this check should seemingly be at
-                                                        ; the start. Commands seem inappropriate in
-                                                        ; INPUT mode and are rejected by the syntax
-                                                        ; checker anyway.
-                                                        ; unless INPUT LINE is being used.
-
-                        BIT 2,(IY+$30)                  ; test FLAGS2 - is the ':' within quotes ?
-                        ;JP Z,colOutCh3
-                        jp Z, colOutColonExtend          ; to colOutColonExtend if ':' is outside quoted text.
-
-                        JP colOutCh2                    ; to OUT-CH-2 as ':' is within quotes
-
-
-; ================================================================================================
-; something with compatibility. weiv from zx-pk.ru is recommending to fill 3xFF and 3xFF+1 with FF
-org $39FF
-        DEFB $ff, $fF
-org $3A01
-; ================================================================================================
 
 
 
-; place after symbol a carriage return and indent 5 spaces
-colOutColonExtend:
-                        push AF
-                        push hl
-
-                        ld hl, ($5c51)                 ; try to determine the channel
-                        ld a, $bb                      ; if not CH#2 (screen), exit
-                        cp l
-                        jp nz, colOutColonExit
-
-
-                        ; the idea is, only if the channel2 is selected (it is the top part of the screen)
-                        ; indentations and all are printed
-
-                        ; newline
-                        ld a, 13
-                        RST 16
-                        ; indent
-                        ld a, 32
-                        RST 16
-                        ld a, 32
-                        RST 16
-                        ld a, 32
-                        RST 16
-                        ; colon
-                        ld a, $3a
-                        RST 16
-                        ; extra indent after THEN
-                        call colIsFlagThen             ; process THEN flag indentation
-                        pop hl
-                        pop af
-                        jp colExit
-                        ;jp colOutCh3
-colOutColonExit:
-                        pop hl
-                        pop af
-                        jp colOutCh3
-
-colOutCh1:
-                        CP $22                          ; is it quote character '"'  ?
-                        JR NZ,colOutCh2                 ; to OUT-CH-2 with others to set 'L' mode.
-
-                        PUSH AF                         ; save character.
-                        LD A,($5C6A)                    ; fetch FLAGS2.
-                        XOR $04                         ; toggle the quotes flag.
-                        LD ($5C6A),A                    ; update FLAGS2
-                        POP AF                          ; and restore character.
-
-colOutCh2:
-                        SET 2,(IY+$01)                  ; update FLAGS - signal L mode if the cursor
-                                                        ; is next.
+; 
+;  .d888 d8b                   888 d8b                   
+; d88P"  Y8P                   888 Y8P                   
+; 888                          888                       
+; 888888 888 88888b.   8888b.  888 888 88888888  .d88b.  
+; 888    888 888 "88b     "88b 888 888    d88P  d8P  Y8b 
+; 888    888 888  888 .d888888 888 888   d88P   88888888 
+; 888    888 888  888 888  888 888 888  d88P    Y8b.     
+; 888    888 888  888 "Y888888 888 888 88888888  "Y8888  
+;                                                        
+;                                                        
+;                                                        
+; 
 
 
-colOutCh3:
-                        RST 10H                         ; PRINT-A vectors the character to
-                                                        ; channel 'S', 'K', 'R' or 'P'.
-
-
-
-colExit:
+col_finalize:
                         POP BC                          ; restore the ATTR from stack
                         LD (23695), BC                  ; restore the ATTR sys var
                         POP BC                          ; restore the BC register
-                        RET                             ; return.
-
-; end of colored list subroutine
+                        RET                             ; return from subroutine
 
 
-; alternative startup message in color
-; the original at L1539
-;;
-msgCopyrightNew:
-        DEFB $10, $2                                    ; red ink
-        DEFB    $7F                                     ; copyright
-        DEFM    " 1982 Sinclair Research Lt"
-        DEFB    'd'+$80
+
+
+
 
 
 
 ; ================================================================================================
 ; something with compatibility. weiv from zx-pk.ru is recommending to fill 3xFF and 3xFF+1 with FF
 
-ORG $3AFF
-        DEFB $FF,$FF
+; org $38FF
+;         DEFB $ff, $fF
+; org $3901
 
-ORG $3BFF
-        DEFB $FF,$FF
+; org $39FF
+;         DEFB $ff, $fF
+; org $3A01
 
-ORG $3CFF
-        DEFB $FF
-; ================================================================================================
+; ORG $3AFF
+;         DEFB $FF,$FF
 
+; ORG $3BFF
+;         DEFB $FF,$FF
 
-/*
+; ORG $3CFF
+;         DEFB $FF
+
         ; free spaces in ROM have to be filled with FF but i'm too lazy to do that honestly. /egl
         ;
         ; here you go:
-        DEFB    $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF;
+        ; DEFB    $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF;
+; ================================================================================================
 
-*/
+
+
+; 
+;                  888       .d888 d8b          d8b          888      
+;                  888      d88P"  Y8P          Y8P          888      
+;                  888      888                              888      
+;  .d8888b .d88b.  888      888888 888 88888b.  888 .d8888b  88888b.  
+; d88P"   d88""88b 888      888    888 888 "88b 888 88K      888 "88b 
+; 888     888  888 888      888    888 888  888 888 "Y8888b. 888  888 
+; Y88b.   Y88..88P 888      888    888 888  888 888      X88 888  888 
+;  "Y8888P "Y88P"  888      888    888 888  888 888  88888P' 888  888 
+;                                                                     
+;                                                                     
+;                                                                     
+; 
+
+
 
 
 
